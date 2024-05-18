@@ -2243,6 +2243,10 @@ namespace gamescope
 					bHasKnownHDRInfo = true;
 				}
 			}
+			else if ( g_customRefreshRates.size() > 0 && GetScreenType() == GAMESCOPE_SCREEN_TYPE_INTERNAL ) {
+				// Only apply custom refresh rates as a fallback, allowing a graceful transition to the new system.
+				m_Mutable.ValidDynamicRefreshRates = g_customRefreshRates;
+			}
 		}
 
 		if ( !bHasKnownColorimetry )
