@@ -3299,7 +3299,7 @@ found:;
 		if ( window_has_commits( focus ) ) 
 			out->focusWindow = focus;
 		else
-			focus->outdatedInteractiveFocus = true;
+			out->outdatedInteractiveFocus = true;
 
 		// Always update X's idea of focus, but still dirty
 		// the it being outdated so we can resolve that globally later.
@@ -6050,28 +6050,37 @@ bool handle_done_commit( steamcompmgr_win_t *w, xwayland_ctx_t *ctx, uint64_t co
 			// Window just got a new available commit, determine if that's worth a repaint
 
 			// If this is an overlay that we're presenting, repaint
-			if ( w == global_focus.overlayWindow && w->opacity != TRANSLUCENT )
+			if ( gameFocused )
 			{
-				hasRepaintNonBasePlane = true;
-			}
+				if ( w == global_focus.overlayWindow && w->opacity != TRANSLUCENT )
+				{
+					hasRepaintNonBasePlane = true;
+				}
 
-			if ( w == global_focus.notificationWindow && w->opacity != TRANSLUCENT )
+				if ( w == global_focus.notificationWindow && w->opacity != TRANSLUCENT )
+				{
+					hasRepaintNonBasePlane = true;
+				}
+			}
+			if ( ctx )
 			{
-				hasRepaintNonBasePlane = true;
+				if ( ctx->focus.outdatedInteractiveFocus )
+				{
+					MakeFocusDirty();
+					ctx->focus.outdatedInteractiveFocus = false;
+				}
 			}
-
-			// If this is an external overlay, repaint
-			if ( w == global_focus.externalOverlayWindow && w->opacity != TRANSLUCENT )
-			{
-				hasRepaintNonBasePlane = true;
-			}
-
-			if ( w->outdatedInteractiveFocus )
+			if ( global_focus.outdatedInteractiveFocus )
 			{
 				MakeFocusDirty();
-				w->outdatedInteractiveFocus = false;
-			}
+				global_focus.outdatedInteractiveFocus = false;
 
+				// If this is an external overlay, repaint
+				if ( w == global_focus.externalOverlayWindow && w->opacity != TRANSLUCENT )
+				{
+					hasRepaintNonBasePlane = true;
+				}
+			}
 			// If this is the main plane, repaint
 			if ( w == global_focus.focusWindow && !w->isSteamStreamingClient )
 			{
