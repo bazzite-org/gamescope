@@ -129,6 +129,8 @@ const struct option *gamescope_options = (struct option[]){
 	{ "fade-out-duration", required_argument, nullptr, 0 },
 	{ "force-orientation", required_argument, nullptr, 0 },
 	{ "disable-hacky-texture", no_argument, nullptr, 0 },
+	{ "force-panel-type", required_argument, nullptr, 0 },
+	{ "force-external-orientation", required_argument, nullptr, 0 },
 	{ "disable-touch-click", no_argument, nullptr, 0 },
 	{ "force-windows-fullscreen", no_argument, nullptr, 0 },
 	{ "custom-refresh-rates", required_argument, nullptr, 0 },
@@ -777,7 +779,7 @@ int main(int argc, char **argv)
 					gamescope::cv_touch_click_mode = (gamescope::TouchClickMode) atoi( optarg );
 				} else if (strcmp(opt_name, "generate-drm-mode") == 0) {
 					g_eGamescopeModeGeneration = parse_gamescope_mode_generation( optarg );
-				} else if (strcmp(opt_name, "force-orientation") == 0) {
+				} else if (strcmp(opt_name, "force-orientation") == 0 || strcmp(opt_name, "force-external-orientation") == 0) {
 					g_DesiredInternalOrientation = force_orientation( optarg );
 				} else if (strcmp(opt_name, "custom-refresh-rates") == 0) {
 					g_customRefreshRates = parse_custom_refresh_rates( optarg );
