@@ -128,6 +128,7 @@ const struct option *gamescope_options = (struct option[]){
 	{ "disable-xres", no_argument, nullptr, 'x' },
 	{ "fade-out-duration", required_argument, nullptr, 0 },
 	{ "force-orientation", required_argument, nullptr, 0 },
+	{ "enable-hacky-texture", no_argument, nullptr, 0 },
 	{ "disable-touch-click", no_argument, nullptr, 0 },
 	{ "force-windows-fullscreen", no_argument, nullptr, 0 },
 	{ "custom-refresh-rates", required_argument, nullptr, 0 },
@@ -189,6 +190,7 @@ const char usage[] =
 	"  -T, --stats-path               write statistics to path\n"
 	"  -C, --hide-cursor-delay        hide cursor image after delay\n"
 	"  -e, --steam                    enable Steam integration\n"
+	"  --enable-hacky-texture         enable hacky texture on hw that support it\n"
 	"  --disable-touch-click          disable touchscreen tap acting as a click\n"
 	"  --xwayland-count               create N xwayland servers\n"
 	"  --prefer-vk-device             prefer Vulkan device for compositing (ex: 1002:7300)\n"
