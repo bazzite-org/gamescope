@@ -1078,7 +1078,7 @@ static uint32_t get_conn_display_info_flags()
 		return 0;
 
 	uint32_t flags = 0;
-	if ( pConn->GetScreenType() == gamescope::GAMESCOPE_SCREEN_TYPE_INTERNAL )
+	if ( pConn->GetScreenType() == gamescope::GAMESCOPE_SCREEN_TYPE_INTERNAL && !g_FakeExternal )
 		flags |= GAMESCOPE_CONTROL_DISPLAY_FLAG_INTERNAL_DISPLAY;
 	if ( pConn->SupportsVRR() )
 		flags |= GAMESCOPE_CONTROL_DISPLAY_FLAG_SUPPORTS_VRR;
