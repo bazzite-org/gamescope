@@ -148,6 +148,7 @@ extern int g_nDynamicRefreshHz;
 
 bool g_bForceHDRSupportDebug = false;
 bool g_bHackyEnabled = false;
+bool g_bVRRModesetting = false;
 extern float g_flInternalDisplayBrightnessNits;
 extern float g_flHDRItmSdrNits;
 extern float g_flHDRItmTargetNits;
@@ -899,7 +900,7 @@ bool g_bChangeDynamicRefreshBasedOnGameOpenRatherThanActive = false;
 bool steamcompmgr_window_should_limit_fps( steamcompmgr_win_t *w )
 {
 	// VRR + FPS Limit needs another approach.
-	if ( GetBackend()->IsVRRActive() )
+	if ( GetBackend()->IsVRRActive() && !(g_bVRRModesetting && GetBackend()->GetScreenType() == gamescope::GAMESCOPE_SCREEN_TYPE_INTERNAL) )
 		return false;
 
 	return w && !window_is_steam( w ) && !w->isOverlay && !w->isExternalOverlay;
@@ -923,7 +924,7 @@ steamcompmgr_user_has_any_game_open()
 
 bool steamcompmgr_window_should_refresh_switch( steamcompmgr_win_t *w )
 {
-	if ( GetBackend()->IsVRRActive() )
+	if ( GetBackend()->IsVRRActive()  && !(g_bVRRModesetting && GetBackend()->GetScreenType() == gamescope::GAMESCOPE_SCREEN_TYPE_INTERNAL))
 		return false;
 
 	if ( g_bChangeDynamicRefreshBasedOnGameOpenRatherThanActive )
@@ -7480,6 +7481,8 @@ steamcompmgr_main(int argc, char **argv)
 					set_mura_overlay(optarg);
 				} else if (strcmp(opt_name, "disable-touch-click") == 0) {
 					cv_disable_touch_click = true;
+				} else if (strcmp(opt_name, "enable-vrr-modesetting") == 0) {
+					g_bVRRModesetting = true;
 				} else if (strcmp(opt_name, "enable-hacky-texture") == 0) {
 					g_bHackyEnabled = true;
 				}
