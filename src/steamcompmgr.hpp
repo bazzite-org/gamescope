@@ -127,6 +127,7 @@ extern float focusedWindowScaleY;
 extern float focusedWindowOffsetX;
 extern float focusedWindowOffsetY;
 
+extern bool g_FakeExternal;
 extern bool g_bFSRActive;
 
 extern uint32_t inputCounter;

@@ -190,6 +190,7 @@ struct wlserver_t {
 };
 
 extern struct wlserver_t wlserver;
+extern bool g_FakeExternal;
 
 std::vector<ResListEntry_t> wlserver_xdg_commit_queue();
 
