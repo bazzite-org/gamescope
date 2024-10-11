@@ -197,6 +197,7 @@ update_runtime_info();
 gamescope::ConVar<bool> cv_adaptive_sync( "adaptive_sync", false, "Whether or not adaptive sync is enabled if available." );
 gamescope::ConVar<bool> cv_adaptive_sync_ignore_overlay( "adaptive_sync_ignore_overlay", false, "Whether or not to ignore overlay planes for pushing commits with adaptive sync." );
 gamescope::ConVar<int> cv_adaptive_sync_overlay_cycles( "adaptive_sync_overlay_cycles", 1, "Number of vblank cycles to ignore overlay repaints before forcing a commit with adaptive sync." );
+gamescope::ConVar<bool> cv_disable_touch_click{ "disable_touch_click", false, "Prevents touchscreen taps acting as clicks" };
 
 uint64_t g_SteamCompMgrLimitedAppRefreshCycle = 16'666'666;
 uint64_t g_SteamCompMgrAppRefreshCycle = 16'666'666;
@@ -5185,7 +5186,7 @@ handle_property_notify(xwayland_ctx_t *ctx, XPropertyEvent *ev)
 			MakeFocusDirty();
 		}
 	}
-	if (ev->atom == ctx->atoms.steamTouchClickModeAtom )
+	if (ev->atom == ctx->atoms.steamTouchClickModeAtom && !cv_disable_touch_click )
 	{
 		gamescope::cv_touch_click_mode = (gamescope::TouchClickMode) get_prop(ctx, ctx->root, ctx->atoms.steamTouchClickModeAtom, 0u );
 	}
@@ -7482,6 +7483,8 @@ steamcompmgr_main(int argc, char **argv)
 					g_reshade_technique_idx = atoi(optarg);
 				} else if (strcmp(opt_name, "mura-map") == 0) {
 					set_mura_overlay(optarg);
+				} else if (strcmp(opt_name, "disable-touch-click") == 0) {
+					cv_disable_touch_click = true;
 				}
 				break;
 			case '?':
