@@ -199,6 +199,7 @@ const char usage[] =
 	"  --xwayland-count               create N xwayland servers\n"
 	"  --prefer-vk-device             prefer Vulkan device for compositing (ex: 1002:7300)\n"
 	"  --force-orientation            rotate the internal display (left, right, normal, upsidedown)\n"
+	"  --force-panel-type             lie to steam that the screen is external\n"
 	"  --force-windows-fullscreen     force windows inside of gamescope to be the size of the nested display (fullscreen)\n"
 	"  --cursor-scale-height          if specified, sets a base output height to linearly scale the cursor against.\n"
 	"  --hdr-enabled                  enable HDR output (needs Gamescope WSI layer enabled for support from clients)\n"
@@ -369,6 +370,19 @@ static GamescopePanelOrientation force_orientation(const char *str)
 		return GAMESCOPE_PANEL_ORIENTATION_180;
 	} else {
 		fprintf( stderr, "gamescope: invalid value for --force-orientation\n" );
+		exit(1);
+	}
+}
+
+bool g_FakeExternal = false;
+static bool force_panel_type_external(const char *str)
+{
+	if (strcmp(str, "internal") == 0) {
+		return false;
+	} else if (strcmp(str, "external") == 0) {
+		return true;
+	} else {
+		fprintf( stderr, "gamescope: invalid value for --force-panel-type\n" );
 		exit(1);
 	}
 }
@@ -783,6 +797,8 @@ int main(int argc, char **argv)
 					g_eGamescopeModeGeneration = parse_gamescope_mode_generation( optarg );
 				} else if (strcmp(opt_name, "force-orientation") == 0 || strcmp(opt_name, "force-external-orientation") == 0) {
 					g_DesiredInternalOrientation = force_orientation( optarg );
+				} else if (strcmp(opt_name, "force-panel-type") == 0) {
+					g_FakeExternal = force_panel_type_external( optarg );
 				} else if (strcmp(opt_name, "custom-refresh-rates") == 0) {
 					g_customRefreshRates = parse_custom_refresh_rates( optarg );
 				} else if (strcmp(opt_name, "sharpness") == 0 ||
