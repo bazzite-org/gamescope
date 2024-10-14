@@ -906,6 +906,11 @@ bool steamcompmgr_window_should_limit_fps( steamcompmgr_win_t *w )
 	return w && !window_is_steam( w ) && !w->isOverlay && !w->isExternalOverlay;
 }
 
+bool steamcompmgr_window_is_steam( steamcompmgr_win_t *w )
+{
+	return w && window_is_steam( w );
+}
+
 static bool
 steamcompmgr_user_has_any_game_open()
 {
@@ -2271,6 +2276,10 @@ paint_all(bool async)
 	notification = global_focus.notificationWindow;
 	override = global_focus.overrideWindow;
 	input = global_focus.inputFocusWindow;
+	// Check whether the focus is steam OR no game is open as not doing so
+	// can cause flickers during boot
+	bool hasGame = steamcompmgr_user_has_any_game_open();
+	bool inSteam = steamcompmgr_window_is_steam( global_focus.focusWindow ) || !hasGame;
 
 	if (++frameCounter == 300)
 	{
@@ -2293,7 +2302,9 @@ paint_all(bool async)
 	struct FrameInfo_t frameInfo = {};
 	frameInfo.applyOutputColorMgmt = g_ColorMgmt.pending.enabled;
 	frameInfo.outputEncodingEOTF = g_ColorMgmt.pending.outputEncodingEOTF;
-	frameInfo.allowVRR = cv_adaptive_sync;
+	// Force VRR off in SteamUI
+	// Its low blanking interval can cause flashing which is undesirable
+	frameInfo.allowVRR = cv_adaptive_sync && !inSteam;
 	frameInfo.bFadingOut = fadingOut;
 
 	// If the window we'd paint as the base layer is the streaming client,
@@ -2510,6 +2521,13 @@ paint_all(bool async)
 		int nTargetRefreshHz = nDynamicRefreshHz && steamcompmgr_window_should_refresh_switch( global_focus.focusWindow )// && !global_focus.overlayWindow
 			? nDynamicRefreshHz
 			: int( rates[ rates.size() - 1 ] );
+		
+		// Force 60 hz when no games are running
+		// If the check is made with steam, the device will modeset when heading
+		// into settings as well, which is undesirable.
+		bool supports60Hz = std::find( rates.begin(), rates.end(), 60 ) != rates.end();
+		if ( supports60Hz && !hasGame )
+			nTargetRefreshHz = 60;
 
 		uint64_t now = get_time_in_nanos();
 
