@@ -165,6 +165,7 @@ uint32_t g_reshade_technique_idx = 0;
 
 bool g_bSteamIsActiveWindow = false;
 bool g_bForceInternal = false;
+bool g_bVRRRequested = false;
 
 static std::vector< steamcompmgr_win_t* > GetGlobalPossibleFocusWindows();
 static bool
@@ -826,6 +827,28 @@ static void _update_app_target_refresh_cycle()
 	if ( g_nCombinedAppRefreshCycleChangeRefresh[ type ] )
 	{
 		auto rates = GetBackend()->GetCurrentConnector()->GetValidDynamicRefreshRates();
+
+		if (g_bVRRModesetting) {
+			if (g_bVRRRequested) {
+				// If modeset VRR, go upwards to match the refresh rate 1-1. Refresh
+				// doubling would hurt us here by breaking the frame limiter.
+				for ( auto rate = rates.begin(); rate != rates.end(); rate++ )
+				{
+					if ((int)*rate == target_fps)
+					{
+						g_nDynamicRefreshRate[ type ] = *rate;
+						// Enable VRR as we have the correct refresh rate
+						cv_adaptive_sync = true;
+						return;
+					}
+				}
+				// Otherwise, disable VRR as we can't match the refresh rate 1-1
+				// (e.g., below 48hz).
+				cv_adaptive_sync = false;
+			} else {
+				cv_adaptive_sync = false;
+			}
+		}
 
 		// Find highest mode to do refresh doubling with.
 		for ( auto rate = rates.rbegin(); rate != rates.rend(); rate++ )
@@ -5522,8 +5545,11 @@ handle_property_notify(xwayland_ctx_t *ctx, XPropertyEvent *ev)
 	}
 	if ( ev->atom == ctx->atoms.gamescopeVRREnabled )
 	{
-		bool enabled = !!get_prop( ctx, ctx->root, ctx->atoms.gamescopeVRREnabled, 0 );
-		cv_adaptive_sync = enabled;
+		g_bVRRRequested = !!get_prop( ctx, ctx->root, ctx->atoms.gamescopeVRREnabled, 0 );
+		// Try to match refresh rate and have that set the cv_adaptive_sync only if it can
+		if (g_bVRRModesetting) update_app_target_refresh_cycle();
+		// otherwise, fall back to original behavior
+		else cv_adaptive_sync = g_bVRRRequested;
 	}
 	if ( ev->atom == ctx->atoms.gamescopeDisplayForceInternal )
 	{
