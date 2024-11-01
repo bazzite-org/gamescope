@@ -5919,6 +5919,10 @@ handle_property_notify(xwayland_ctx_t *ctx, XPropertyEvent *ev)
 			MakeFocusDirty();
 		}
 	}
+	if ( ev->atom == ctx->atoms.gamescopeFrameHalveAtom )
+	{
+		g_bRefreshHalveEnable = !!get_prop( ctx, ctx->root, ctx->atoms.gamescopeFrameHalveAtom, 0 );
+	}
 }
 
 static int
@@ -7088,6 +7092,8 @@ void init_xwayland_ctx(uint32_t serverId, gamescope_xwayland_server_t *xwayland_
 	ctx->atoms.clipboard = XInternAtom(ctx->dpy, "CLIPBOARD", false);
 	ctx->atoms.primarySelection = XInternAtom(ctx->dpy, "PRIMARY", false);
 	ctx->atoms.targets = XInternAtom(ctx->dpy, "TARGETS", false);
+
+	ctx->atoms.gamescopeFrameHalveAtom = XInternAtom( ctx->dpy, "GAMESCOPE_STEAMUI_HALFHZ", false );;
 
 	ctx->root_width = DisplayWidth(ctx->dpy, ctx->scr);
 	ctx->root_height = DisplayHeight(ctx->dpy, ctx->scr);
