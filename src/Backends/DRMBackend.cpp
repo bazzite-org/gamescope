@@ -2668,6 +2668,9 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
 			drm->needs_modeset = true;
 	}
 
+	if (drm->pCRTC && drm->pCRTC->GetProperties().ACTIVE->GetCurrentValue() != !frameInfo->dpms)
+		drm->needs_modeset = true;
+
 	drm_colorspace uColorimetry = DRM_MODE_COLORIMETRY_DEFAULT;
 
 	const bool bWantsHDR10 = g_bOutputHDREnabled && frameInfo->outputEncodingEOTF == EOTF_PQ;
@@ -2723,7 +2726,7 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
 	uint32_t flags = DRM_MODE_ATOMIC_NONBLOCK;
 
 	// We do internal refcounting with these events
-	if ( drm->pCRTC != nullptr )
+	if ( !frameInfo->dpms && drm->pCRTC != nullptr)
 		flags |= DRM_MODE_PAGE_FLIP_EVENT;
 
 	if ( async || g_bForceAsyncFlips )
@@ -2796,7 +2799,13 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
 
 		if ( drm->pCRTC )
 		{
-			drm->pCRTC->GetProperties().ACTIVE->SetPendingValue( drm->req, 1u, true );
+			if ( frameInfo->dpms ) {
+				// We can't disable a CRTC if it's already disabled
+				if (drm->pCRTC->GetProperties().ACTIVE->GetCurrentValue() != 0)
+					drm->pCRTC->GetProperties().ACTIVE->SetPendingValue(drm->req, 0, true);
+			}
+			else
+				drm->pCRTC->GetProperties().ACTIVE->SetPendingValue( drm->req, 1u, true );
 			drm->pCRTC->GetProperties().MODE_ID->SetPendingValue( drm->req, drm->pending.mode_id ? drm->pending.mode_id->GetBlobValue() : 0lu, true );
 
 			if ( drm->pCRTC->GetProperties().VRR_ENABLED )
@@ -2827,7 +2836,7 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
 	drm->flags = flags;
 
 	int ret;
-	if ( drm->pCRTC == nullptr ) {
+	if (frameInfo->dpms || drm->pCRTC == nullptr ) {
 		ret = 0;
 	} else if ( drm->bUseLiftoff ) {
 		ret = drm_prepare_liftoff( drm, frameInfo, needs_modeset );
@@ -3390,6 +3399,7 @@ namespace gamescope
 
 			FrameInfo_t presentCompFrameInfo = {};
 			presentCompFrameInfo.allowVRR = pFrameInfo->allowVRR;
+			presentCompFrameInfo.dpms = pFrameInfo->dpms;
 			presentCompFrameInfo.outputEncodingEOTF = pFrameInfo->outputEncodingEOTF;
 
 			if ( bNeedsFullComposite )
