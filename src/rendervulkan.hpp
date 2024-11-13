@@ -281,6 +281,8 @@ struct FrameInfo_t
 	bool applyOutputColorMgmt; // drm only
 	EOTF outputEncodingEOTF;
 
+	bool dpms;
+
 	int layerCount;
 	struct Layer_t
 	{

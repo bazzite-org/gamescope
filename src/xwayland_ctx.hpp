@@ -248,6 +248,7 @@ struct xwayland_ctx_t final : public gamescope::IWaitable
 		Atom targets;
 
 		Atom gamescopeFrameHalveAtom;
+		Atom gamescopeDPMS;
 	} atoms;
 
 	bool HasQueuedEvents();
