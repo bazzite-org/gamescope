@@ -2519,6 +2519,11 @@ static void apply_touchscreen_orientation(double *x, double *y )
 			break;
 	}
 
+	if (g_bUseRotationShader) {
+		tx = 1.0 - *y;
+		ty = *x;
+	}
+
 	*x = tx;
 	*y = ty;
 }
