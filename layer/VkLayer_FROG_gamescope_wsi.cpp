@@ -496,7 +496,11 @@ namespace GamescopeWSILayer {
       createInfo.ppEnabledExtensionNames = enabledExts.data();
 
       setenv("vk_xwayland_wait_ready", "false", 0);
-      setenv("vk_khr_present_wait", "true", 0);
+      if (getHidePresentWait()) {
+        setenv("vk_khr_present_wait", "false", 0);
+      } else {
+        setenv("vk_khr_present_wait", "true", 0);
+      }
 
       VkResult result = pfnCreateInstanceProc(&createInfo, pAllocator, pInstance);
       if (result != VK_SUCCESS)
@@ -801,6 +805,10 @@ namespace GamescopeWSILayer {
       const vkroots::VkInstanceDispatch* pDispatch,
             VkPhysicalDevice             physicalDevice,
             VkPhysicalDeviceFeatures2*   pFeatures) {
+      if (getHidePresentWait()) {
+        fprintf(stderr, "[Gamescope WSI] Removing VkPhysicalDevicePresentWaitFeaturesKHR because GAMESCOPE_WSI_HIDE_PRESENT_WAIT_EXT is set\n");
+        vkroots::RemoveFromChain<VkPhysicalDevicePresentWaitFeaturesKHR>(pFeatures);
+      }
       pDispatch->GetPhysicalDeviceFeatures2(physicalDevice, pFeatures);
     }
 
@@ -1013,6 +1021,16 @@ namespace GamescopeWSILayer {
         return std::nullopt;
 
       return value;
+    }
+
+    static bool getHidePresentWait() {
+      static bool s_hidePresentWait = []() -> bool {
+        if (auto hide = parseEnv<uint32_t>("GAMESCOPE_WSI_HIDE_PRESENT_WAIT_EXT")) {
+          return *hide == 1;
+        }
+        return false;
+      }();
+      return s_hidePresentWait;
     }
 
     static uint32_t getMinImageCount() {
