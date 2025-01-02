@@ -129,6 +129,7 @@ extern float focusedWindowOffsetY;
 
 extern bool g_FakeExternal;
 extern bool g_bFSRActive;
+extern bool g_bBicubicActive;
 
 extern uint32_t inputCounter;
 extern uint64_t g_lastWinSeq;
