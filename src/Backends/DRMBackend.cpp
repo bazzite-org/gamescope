@@ -2333,7 +2333,7 @@ namespace gamescope
 				}
 			}
 
-			if ( pColorimetry && pColorimetry->bt2020_rgb &&
+			if ( g_bHDRPqEnable && GetScreenType() != GAMESCOPE_SCREEN_TYPE_INTERNAL && pColorimetry && pColorimetry->bt2020_rgb &&
 				 pHDRStaticMetadata && pHDRStaticMetadata->eotfs && pHDRStaticMetadata->eotfs->pq )
 			{
 				m_Mutable.HDR.bExposeHDRSupport = true;

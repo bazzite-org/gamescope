@@ -38,6 +38,7 @@ static const uint32_t g_zposOverlay = 3;
 static const uint32_t g_zposCursor = 4;
 static const uint32_t g_zposMuraCorrection = 5;
 
+extern bool g_bHDRPqEnable;
 extern bool g_bHDRItmEnable;
 extern bool g_bForceHDRSupportDebug;
 

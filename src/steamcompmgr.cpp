@@ -366,6 +366,7 @@ bool g_bVRRInUse_CachedValue = false;
 bool g_bSupportsHDR_CachedValue = false;
 bool g_bForceHDR10OutputDebug = false;
 gamescope::ConVar<bool> cv_hdr_enabled{ "hdr_enabled", false, "Whether or not HDR is enabled if it is available." };
+bool g_bHDRPqEnable = true;
 bool g_bHDRItmEnable = false;
 int g_nCurrentRefreshRate_CachedValue = 0;
 
@@ -7517,6 +7518,8 @@ steamcompmgr_main(int argc, char **argv)
 					g_bForceHDRSupportDebug = true;
  				} else if (strcmp(opt_name, "hdr-debug-force-output") == 0) {
 					g_bForceHDR10OutputDebug = true;
+				} else if (strcmp(opt_name, "hdr-pq-disabled") == 0 || strcmp(opt_name, "hdr-pq-disable") == 0) {
+					g_bHDRPqEnable = false;
 				} else if (strcmp(opt_name, "hdr-itm-enabled") == 0 || strcmp(opt_name, "hdr-itm-enable") == 0) {
 					g_bHDRItmEnable = true;
 				} else if (strcmp(opt_name, "sdr-gamut-wideness") == 0) {
